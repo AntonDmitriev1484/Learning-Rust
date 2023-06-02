@@ -178,12 +178,97 @@ enum Exp {
 }
 
 fn scan(str: String) -> Exp {
-    let hasParens: Option<Exp::Parentheses> = None;
-    let hasExponents: Option<Exp::Exponent> = None;
+
+    let mut hasParens: Option<Exp> = None;
+    let mut hasExpon: Option<Exp> = None;
+    let mut hasAdd: Option<Exp> = None;
+    let mut hasSub: Option<Exp> = None;
+    let mut hasMul: Option<Exp> = None;
+    let mut hasDiv: Option<Exp> = None;
+    let mut isNum: Option<Exp> = None;
+
+
+    let mut parensCounter:i32 = 0;
+    let mut startParenIndex:i32 = 0;
+    let mut endParenIndex:i32 = 0;
+
+    let len: i32 = str.chars().count() as i32;
+
+    for (i,c) in str.chars().enumerate() {
+        let j = i as i32;
+
+        let l_string = substring(str.clone(), 0, j);
+        let r_string = substring(str.clone(), j+1, len);
+
+        //Re-do this with a map lol
+        match c {
+            '+' => hasAdd = Some(Exp::Add(l_string, r_string)),
+            '-' => hasSub = Some(Exp::Subtract(l_string, r_string)),
+            '*' => hasMul = Some(Exp::Multiply(l_string, r_string)),
+            '/' => hasDiv = Some(Exp::Division(l_string, r_string)),
+            '^' => hasExpon = Some(Exp::Exponent(l_string, r_string)),
+            '(' => {
+                parensCounter += 1;
+                startParenIndex = i as i32 + 1;
+            }
+            ')' => {
+                parensCounter -= 1;
+                if (parensCounter == 0) {
+                    endParenIndex = i as i32;
+                    hasParens = Some(Exp::Parentheses(substring(str.clone(), startParenIndex, endParenIndex)));
+                }
+            }
+            _ => isNum = Some(Exp::Num(str.clone()))
+        };
+
+    };
+
+    match hasParens {
+        Some(exp) => exp,
+        None =>
+            match hasExpon {
+                Some(exp) => exp,
+                None =>
+                    match hasMul {
+                        Some(exp) => exp,
+                        None =>
+                            match hasDiv {
+                                Some(exp) => exp,
+                                None =>
+                                    match hasAdd {
+                                        Some(exp) => exp,
+                                        None =>
+                                            match hasSub {
+                                                Some(exp) => exp,
+                                                None =>
+                                                    match isNum {
+                                                        Some(exp) => exp,
+                                                        None => Exp::Num(String::from(""))
+                                                    }
+                                            }
+                                    }
+                            }
+                    }
+            }
+    }
+
+
+
 }
 
 fn evaluate(exp: Exp) -> i32 {
+    let e = scan(String::from("5+(6*7)^9"));
 
+    match e {
+
+    Exp::Parentheses(x) =>
+    println!("Inner expression: {}", x),
+
+    _ => println!("wonkus")
+
+    }
+
+    0
 }
 
 fn calculator_PEMDAS() {
@@ -194,7 +279,8 @@ fn main() {
 
     //guessing_game();
     //calculator();
-    calculator_HOF();
+    //calculator_HOF();
+    evaluate(Exp::Parentheses(String::from("5+(6*7)")));
 }
 
 
