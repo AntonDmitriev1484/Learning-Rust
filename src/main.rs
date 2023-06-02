@@ -130,7 +130,7 @@ fn run_on_find_in_string<P:Fn(char)->bool, R:Fn(char, i32, String)->()>
 fn calculator_HOF() -> () {
     let mut input: String = String::new();
     io::stdin().read_line(&mut input);
-    let input:&str = input.trim_end();
+    let input: &str = input.trim_end();
 
     let predicate = |c: char| -> bool {
         !c.is_ascii_digit()
@@ -144,9 +144,9 @@ fn calculator_HOF() -> () {
         // So, I need to manually clone input in at least 2 of the 3 places I pass it to the function
 
         // &substring() is to convert from String -> &str
-        let operand1: f32 = f32::from_str(&substring(input.clone(),0,i)).unwrap(); //Clone input here
+        let operand1: f32 = f32::from_str(&substring(input.clone(), 0, i)).unwrap(); //Clone input here
 
-        let operand2: f32 = f32::from_str(&substring(input.clone(), i+1, input.len() as i32)).unwrap();
+        let operand2: f32 = f32::from_str(&substring(input.clone(), i + 1, input.len() as i32)).unwrap();
         // Give up ownership here, 'move' ownership of input to substring but thats fine since I no longer need it.
 
         println!(" {} {} {} ", operand1, op, operand2);
@@ -164,6 +164,30 @@ fn calculator_HOF() -> () {
     run_on_find_in_string(predicate, calculate, String::from(input));
 
     calculator_HOF()
+}
+
+
+enum Exp {
+    Parentheses(String),
+    Exponent(String, String),
+    Add(String, String),
+    Subtract(String, String),
+    Multiply(String, String),
+    Division(String, String),
+    Num(String)
+}
+
+fn scan(str: String) -> Exp {
+    let hasParens: Option<Exp::Parentheses> = None;
+    let hasExponents: Option<Exp::Exponent> = None;
+}
+
+fn evaluate(exp: Exp) -> i32 {
+
+}
+
+fn calculator_PEMDAS() {
+    
 }
 
 fn main() {
