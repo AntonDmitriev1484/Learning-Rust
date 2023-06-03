@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::env;
 use std::mem;
 use std::io;
@@ -167,111 +168,98 @@ fn calculator_HOF() -> () {
 }
 
 
-enum Exp {
-    Parentheses(String),
-    Exponent(String, String),
-    Add(String, String),
-    Subtract(String, String),
-    Multiply(String, String),
-    Division(String, String),
-    Num(String)
-}
-
-fn scan(str: String) -> Exp {
-
-    let mut hasParens: Option<Exp> = None;
-    let mut hasExpon: Option<Exp> = None;
-    let mut hasAdd: Option<Exp> = None;
-    let mut hasSub: Option<Exp> = None;
-    let mut hasMul: Option<Exp> = None;
-    let mut hasDiv: Option<Exp> = None;
-    let mut isNum: Option<Exp> = None;
+// fn evaluate(exp: Exp) -> i32 {
+//     let e = scan(String::from("5+(6*7)^9"));
+//
+//     match e {
+//
+//     Exp::Parentheses(x) =>
+//     println!("Inner expression: {}", x),
+//
+//     _ => println!("wonkus")
+//
+//     }
+//
+//     0
+// }
 
 
-    let mut parensCounter:i32 = 0;
-    let mut startParenIndex:i32 = 0;
-    let mut endParenIndex:i32 = 0;
 
-    let len: i32 = str.chars().count() as i32;
 
-    for (i,c) in str.chars().enumerate() {
-        let j = i as i32;
 
-        let l_string = substring(str.clone(), 0, j);
-        let r_string = substring(str.clone(), j+1, len);
+fn tokenize(str: String)->Vec<String> {
+    let mut tokens: Vec<String> = Vec::new();
 
-        //Re-do this with a map lol
-        match c {
-            '+' => hasAdd = Some(Exp::Add(l_string, r_string)),
-            '-' => hasSub = Some(Exp::Subtract(l_string, r_string)),
-            '*' => hasMul = Some(Exp::Multiply(l_string, r_string)),
-            '/' => hasDiv = Some(Exp::Division(l_string, r_string)),
-            '^' => hasExpon = Some(Exp::Exponent(l_string, r_string)),
-            '(' => {
-                parensCounter += 1;
-                startParenIndex = i as i32 + 1;
-            }
-            ')' => {
-                parensCounter -= 1;
-                if (parensCounter == 0) {
-                    endParenIndex = i as i32;
-                    hasParens = Some(Exp::Parentheses(substring(str.clone(), startParenIndex, endParenIndex)));
-                }
-            }
-            _ => isNum = Some(Exp::Num(str.clone()))
-        };
+    let mut operations: HashMap<char, Box<Fn(i32, i32)->i32>> =
+    //I don't understand
+    // why on earth
+    // I need to wrap a box around this
+    // I should just use the fucking std add operator, at this point it might be more straightforward
+    // than whatever the hell this is.
+        HashMap::from(
+            [('+', fuck you),
+                ('-', (|x, y| x-y)),
+                ('*', (|x, y| x*y)),
+                ('/', (|x, y| x/y)),
+                ('^', (|x, y| x^y))
+            ]
+        );
 
+    let mut num: String = String::new();
+
+    let complete_num = || {
+        tokens.push(num);
+        num = String::new();
     };
 
-    match hasParens {
-        Some(exp) => exp,
-        None =>
-            match hasExpon {
-                Some(exp) => exp,
-                None =>
-                    match hasMul {
-                        Some(exp) => exp,
-                        None =>
-                            match hasDiv {
-                                Some(exp) => exp,
-                                None =>
-                                    match hasAdd {
-                                        Some(exp) => exp,
-                                        None =>
-                                            match hasSub {
-                                                Some(exp) => exp,
-                                                None =>
-                                                    match isNum {
-                                                        Some(exp) => exp,
-                                                        None => Exp::Num(String::from(""))
-                                                    }
-                                            }
-                                    }
-                            }
+    for (i,c) in str.chars.enumerate() {
+
+        match operations.get(c) {
+            Some(f) => {
+                tokens.push(c);
+                complete_num();
+            },
+            None =>
+                match c {
+                    '(' | ')' => {
+                        tokens.push(c);
+                        complete_num();
+                    },
+                    _ => {
+                        if (c.is_digit(10)) {
+                            num += c;
+                        } // Otherwise its a character
                     }
-            }
-    }
 
-
-
-}
-
-fn evaluate(exp: Exp) -> i32 {
-    let e = scan(String::from("5+(6*7)^9"));
-
-    match e {
-
-    Exp::Parentheses(x) =>
-    println!("Inner expression: {}", x),
-
-    _ => println!("wonkus")
+                }
+        }
 
     }
 
-    0
+    tokens
 }
 
 fn calculator_PEMDAS() {
+
+    let mut input = String::new();
+    io::stdin().read_line(&mut input);
+    let input: &str = input.trim_end();
+
+    let mut Queue: Vec<char> = Vec::new();
+    let mut Stack: Vec<char> = Vec::new();
+
+
+    let v: Vec<String> = tokenize(String::from(input));
+    println!("tokens: {}", v.reduce(String::new(), |acc, x| acc+x));
+
+    // for (i,c) in tokenize(String::from(input)).iter() {
+    //
+    // }
+
+
+
+    let mut ArithmeticStack: Vec<i32> = Vec::new();
+
     
 }
 
@@ -280,7 +268,8 @@ fn main() {
     //guessing_game();
     //calculator();
     //calculator_HOF();
-    evaluate(Exp::Parentheses(String::from("5+(6*7)")));
+    //evaluate(Exp::Parentheses(String::from("5+(6*7)")));
+    calculator_PEMDAS();
 }
 
 
